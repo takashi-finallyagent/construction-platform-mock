@@ -13,6 +13,7 @@ import {
   Outlet,
   RouterProvider,
   useNavigate,
+  useLocation,
   useParams,
 } from 'react-router'
 import {
@@ -67,6 +68,7 @@ import {
   users,
   workSchedules,
 } from './data/mock/domain'
+import { laborInsuranceRecords } from './data/mock/laborInsurance'
 import type {
   AuditLog,
   Contract,
@@ -74,6 +76,9 @@ import type {
   DocumentRecord,
   Estimate,
   Invoice,
+  LaborInsuranceRecord,
+  LaborInsuranceTask,
+  LaborInsuranceTaskStatus,
   NoticeLevel,
   PermissionKey,
   Role,
@@ -112,6 +117,7 @@ const navItems: NavItem[] = [
   { to: '/daily-reports', label: '日報', icon: NotebookText },
   { to: '/invoices', label: '請求', icon: ReceiptText },
   { to: '/documents', label: '書類', icon: FolderArchive },
+  { to: '/labor-insurance', label: '労働保険', icon: ShieldCheck },
   { to: '/licenses', label: '建設業許可', icon: ShieldCheck },
   { to: '/company', label: '会社情報', icon: BriefcaseBusiness },
   { to: '/settings', label: '設定', icon: Settings },
@@ -138,6 +144,7 @@ const router = createHashRouter([
           { path: 'daily-reports', element: <DailyReportsPage /> },
           { path: 'invoices', element: <InvoicesPage /> },
           { path: 'documents', element: <DocumentsPage /> },
+          { path: 'labor-insurance', element: <LaborInsurancePage /> },
           { path: 'licenses', element: <LicensesPage /> },
           { path: 'company', element: <CompanyPage /> },
           { path: 'settings', element: <SettingsPage /> },
@@ -325,9 +332,18 @@ function AppShell() {
         </header>
 
         <main className="app-main mx-auto grid w-full max-w-[1500px] gap-7 px-4 py-6 md:px-8 md:py-8">
-          <Outlet />
+          <AnimatedOutlet />
         </main>
       </div>
+    </div>
+  )
+}
+
+function AnimatedOutlet() {
+  const location = useLocation()
+  return (
+    <div key={location.pathname} className="route-stage">
+      <Outlet />
     </div>
   )
 }
@@ -1199,6 +1215,277 @@ function DocumentsPage() {
         <DocumentList data={documents} />
       </Section>
     </>
+  )
+}
+
+function LaborInsurancePage() {
+  const [selectedSiteId, setSelectedSiteId] = useState(laborInsuranceRecords[0].siteId)
+  const [taskOverrides, setTaskOverrides] = useState<Record<string, LaborInsuranceTaskStatus>>({})
+  const selectedRecord = laborInsuranceRecords.find((record) => record.siteId === selectedSiteId) ?? laborInsuranceRecords[0]
+
+  const statusFor = (task: LaborInsuranceTask) => taskOverrides[task.id] ?? task.status
+  const selectedCompleted = selectedRecord.tasks.filter((task) => statusFor(task) === '完了').length
+  const selectedApplicable = selectedRecord.tasks.filter((task) => statusFor(task) !== '対象外').length
+  const selectedProgress = selectedApplicable === 0 ? 0 : Math.round((selectedCompleted / selectedApplicable) * 100)
+
+  const toggleTask = (task: LaborInsuranceTask) => {
+    if (task.status === '対象外') {
+      return
+    }
+
+    setTaskOverrides((current) => ({
+      ...current,
+      [task.id]: statusFor(task) === '完了' ? '未完了' : '完了',
+    }))
+  }
+
+  return (
+    <>
+      <PageHeader
+        label="COMPLIANCE / LABOR INSURANCE"
+        title="現場別 労働保険管理"
+        description="工事単位の労災保険と、事業所単位の雇用保険を分けて管理します。"
+      />
+
+      <section className="insurance-system-map" aria-labelledby="insurance-model-title">
+        <div className="insurance-map-copy">
+          <p className="panel-label">APPLICATION MODEL</p>
+          <h2 id="insurance-model-title">建設業は二元適用</h2>
+          <p>現場労災は元請が工事全体を管理し、雇用保険は会社の適用事業所へ紐付けます。</p>
+        </div>
+        <div className="insurance-flow" aria-label="元請、現場労災、下請労働者の適用関係">
+          <div className="insurance-flow-node">
+            <span>01</span>
+            <strong>元請事業主</strong>
+          </div>
+          <div className="insurance-flow-line"><span /></div>
+          <div className="insurance-flow-node is-primary">
+            <span>02</span>
+            <strong>現場労災</strong>
+          </div>
+          <div className="insurance-flow-line"><span /></div>
+          <div className="insurance-flow-node">
+            <span>03</span>
+            <strong>下請労働者を包含</strong>
+          </div>
+        </div>
+        <div className="insurance-split-model">
+          <div><span className="model-marker cyan" />労災保険 <strong>工事単位</strong></div>
+          <div><span className="model-marker lime" />雇用保険 <strong>事業所単位</strong></div>
+        </div>
+      </section>
+
+      <div className="legal-scope-note">
+        <Info size={18} aria-hidden="true" />
+        <p>
+          この画面は手続管理用です。工事区分・一括要件・下請分離の最終判断は、契約内容と施工実態を基に管轄の労働局・労働基準監督署へ確認してください。
+        </p>
+      </div>
+
+      <Section title="現場別の適用状況">
+        <div className="insurance-site-selector" role="tablist" aria-label="労働保険を確認する現場">
+          {laborInsuranceRecords.map((record, index) => {
+            const recordSite = sites.find((site) => site.id === record.siteId)
+            const complete = record.tasks.filter((task) => (taskOverrides[task.id] ?? task.status) === '完了').length
+            const applicable = record.tasks.filter((task) => (taskOverrides[task.id] ?? task.status) !== '対象外').length
+            const progress = applicable === 0 ? 0 : Math.round((complete / applicable) * 100)
+
+            return (
+              <button
+                key={record.id}
+                type="button"
+                role="tab"
+                aria-selected={selectedSiteId === record.siteId}
+                className={`insurance-site-card ${selectedSiteId === record.siteId ? 'is-selected' : ''}`}
+                onClick={() => setSelectedSiteId(record.siteId)}
+              >
+                <span className="insurance-site-index">0{index + 1}</span>
+                <span className={`insurance-status-label status-${record.status}`}>{record.status}</span>
+                <strong>{recordSite?.name ?? '不明な現場'}</strong>
+                <span className="insurance-site-meta">{record.coverageType} / 業種 {record.industryCode}</span>
+                <span className="insurance-card-progress"><span style={{ width: `${progress}%` }} /></span>
+                <span className="insurance-progress-label">手続 {progress}%</span>
+              </button>
+            )
+          })}
+        </div>
+      </Section>
+
+      <LaborInsuranceDetail
+        key={selectedRecord.id}
+        record={selectedRecord}
+        progress={selectedProgress}
+        statusFor={statusFor}
+        onToggleTask={toggleTask}
+      />
+
+      <section className="insurance-rule-grid" aria-label="主要な制度ルール">
+        <RuleCard number="01" title="一括有期の規模要件" body="税抜請負額1億8,000万円未満、かつ概算保険料160万円未満。" />
+        <RuleCard number="02" title="単独有期の期限" body="成立届10日、概算申告20日、工事終了後の確定精算50日。" />
+        <RuleCard number="03" title="下請の原則" body="分離認可がない限り、元請が下請労働者分も含めて適用。" />
+      </section>
+
+      <Section title="制度根拠">
+        <div className="official-source-list">
+          <OfficialSourceLink
+            href="https://jsite.mhlw.go.jp/hyogo-roudoukyoku/hourei_seido_tetsuzuki/roudou_hoken/tetsuzuki/kensetsugyo_ringyou.html"
+            title="建設業・林業の場合"
+            publisher="厚生労働省 兵庫労働局"
+          />
+          <OfficialSourceLink
+            href="https://www.mhlw.go.jp/new-info/kobetu/roudou/gyousei/hoken/kakikata/dl/hoken-11.pdf"
+            title="労働保険年度更新 申告書の書き方"
+            publisher="厚生労働省"
+          />
+          <OfficialSourceLink
+            href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/rousai/rousaihoken06/rousai_hokenritsu_kaitei.html"
+            title="令和8年度の労災保険率等"
+            publisher="厚生労働省"
+          />
+        </div>
+      </Section>
+    </>
+  )
+}
+
+function LaborInsuranceDetail({
+  record,
+  progress,
+  statusFor,
+  onToggleTask,
+}: {
+  record: LaborInsuranceRecord
+  progress: number
+  statusFor: (task: LaborInsuranceTask) => LaborInsuranceTaskStatus
+  onToggleTask: (task: LaborInsuranceTask) => void
+}) {
+  const recordSite = sites.find((site) => site.id === record.siteId)
+  const isTaskComplete = (index: number) => {
+    const task = record.tasks[index]
+    return task ? statusFor(task) === '完了' : false
+  }
+  const processSteps = [
+    { label: '事業種類判定', complete: isTaskComplete(0) },
+    { label: '一括・単独判定', complete: isTaskComplete(1) },
+    { label: '保険関係確認', complete: Boolean(record.laborInsuranceNumber) },
+    { label: '成立票掲示', complete: isTaskComplete(2) },
+    { label: '年度更新・精算', complete: isTaskComplete(4) },
+  ]
+
+  return (
+    <section className="insurance-detail" aria-label={`${recordSite?.name ?? ''}の労働保険詳細`}>
+      <div className="insurance-detail-header">
+        <div>
+          <p className="panel-label">SITE INSURANCE FILE</p>
+          <h2>{recordSite?.name}</h2>
+          <p>{record.determination}</p>
+        </div>
+        <div className="insurance-completion" aria-label={`手続進捗 ${progress}%`}>
+          <strong>{progress}%</strong>
+          <span>手続進捗</span>
+        </div>
+      </div>
+
+      <div className="insurance-process" aria-label="労災保険手続の流れ">
+        {processSteps.map((step, index) => {
+          return (
+            <div key={step.label} className={`insurance-process-step ${step.complete ? 'is-complete' : ''}`}>
+              <span>{step.complete ? <CheckCircle2 size={17} aria-hidden="true" /> : index + 1}</span>
+              <strong>{step.label}</strong>
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="insurance-data-grid">
+        <div className="insurance-data-card workers-comp-card">
+          <div className="insurance-data-heading">
+            <span className="model-marker cyan" />
+            <div><p>WORKERS' COMPENSATION</p><h3>労災保険</h3></div>
+          </div>
+          <dl>
+            <InsuranceDataRow label="適用方式" value={record.coverageType} />
+            <InsuranceDataRow label="業種区分" value={`${record.industryCode} ${record.industryName}`} />
+            <InsuranceDataRow label="労働保険番号" value={record.laborInsuranceNumber ?? '着工前判定後に確定'} />
+            <InsuranceDataRow label="一括事務所" value={record.blanketOfficeName} />
+            <InsuranceDataRow label="元請事業主" value={record.primeContractor} />
+            <InsuranceDataRow label="成立票掲示" value={record.boardPostedAt ? `${formatDate(record.boardPostedAt)} 掲示済` : '未掲示'} />
+          </dl>
+        </div>
+
+        <div className="insurance-data-card employment-card">
+          <div className="insurance-data-heading">
+            <span className="model-marker lime" />
+            <div><p>EMPLOYMENT INSURANCE</p><h3>雇用保険</h3></div>
+          </div>
+          <dl>
+            <InsuranceDataRow label="適用単位" value="事業所単位" />
+            <InsuranceDataRow label="事業所番号" value={record.employmentInsuranceOfficeNumber} />
+            <InsuranceDataRow label="現場固有番号" value="付与しない" />
+            <InsuranceDataRow label="資格取得管理" value="人員台帳で管理" />
+          </dl>
+          <p className="employment-note">建設業は二元適用のため、現場労災の番号と混在させません。</p>
+        </div>
+      </div>
+
+      <div className="premium-calculation">
+        <div><span>税抜請負額</span><strong>{formatCurrency(record.contractAmountExTax)}</strong></div>
+        <span className="calculation-operator">×</span>
+        <div><span>労務費率</span><strong>{record.laborCostRatePercent}%</strong></div>
+        <span className="calculation-operator">×</span>
+        <div><span>労災保険率</span><strong>{record.insuranceRatePerThousand} / 1,000</strong></div>
+        <span className="calculation-operator">=</span>
+        <div className="calculation-result"><span>概算保険料</span><strong>{formatCurrency(record.estimatedPremium)}</strong></div>
+      </div>
+
+      <div className="insurance-checklist">
+        <div className="checklist-heading">
+          <div><p className="panel-label">EVIDENCE CHECKLIST</p><h3>手続・証跡</h3></div>
+          <span>クリックで完了状態を切替</span>
+        </div>
+        <div className="checklist-items">
+          {record.tasks.map((task) => {
+            const taskStatus = statusFor(task)
+            return (
+              <button
+                key={task.id}
+                type="button"
+                className={`checklist-item ${taskStatus === '完了' ? 'is-complete' : ''}`}
+                aria-pressed={taskStatus === '完了'}
+                disabled={taskStatus === '対象外'}
+                onClick={() => onToggleTask(task)}
+              >
+                <span className="checklist-status" aria-hidden="true">
+                  {taskStatus === '完了' ? <CheckCircle2 size={19} /> : <span />}
+                </span>
+                <span className="checklist-copy"><strong>{task.label}</strong><small>{task.description}</small></span>
+                <span className="checklist-evidence">
+                  {task.evidence ? `証跡: ${task.evidence}` : task.dueDate ? `期限: ${formatDate(task.dueDate)}` : '未登録'}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function InsuranceDataRow({ label, value }: { label: string; value: string }) {
+  return <div><dt>{label}</dt><dd>{value}</dd></div>
+}
+
+function RuleCard({ number, title, body }: { number: string; title: string; body: string }) {
+  return <article className="insurance-rule-card"><span>{number}</span><h3>{title}</h3><p>{body}</p></article>
+}
+
+function OfficialSourceLink({ href, title, publisher }: { href: string; title: string; publisher: string }) {
+  return (
+    <a className="official-source-link" href={href} target="_blank" rel="noreferrer">
+      <span>{publisher}</span>
+      <strong>{title}</strong>
+      <ArrowUpRight size={18} aria-hidden="true" />
+    </a>
   )
 }
 

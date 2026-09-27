@@ -289,3 +289,40 @@ export interface Notice {
   body: string
   action: string
 }
+
+export type LaborInsuranceCoverageType = '一括有期事業' | '単独有期事業' | '判定中'
+
+export type LaborInsuranceRecordStatus = '適用済' | '要対応' | '着工前'
+
+export type LaborInsuranceTaskStatus = '完了' | '未完了' | '対象外'
+
+export interface LaborInsuranceTask {
+  id: string
+  label: string
+  description: string
+  dueDate?: string
+  evidence?: string
+  status: LaborInsuranceTaskStatus
+}
+
+export interface LaborInsuranceRecord {
+  id: string
+  siteId: string
+  status: LaborInsuranceRecordStatus
+  coverageType: LaborInsuranceCoverageType
+  determination: string
+  industryCode: '35' | '38'
+  industryName: '建築事業' | '既設建築物設備工事業'
+  insuranceRatePerThousand: number
+  laborCostRatePercent: number
+  contractAmountExTax: number
+  estimatedPayroll: number
+  estimatedPremium: number
+  laborInsuranceNumber?: string
+  relationEstablishedAt?: string
+  boardPostedAt?: string
+  blanketOfficeName: string
+  employmentInsuranceOfficeNumber: string
+  primeContractor: string
+  tasks: LaborInsuranceTask[]
+}

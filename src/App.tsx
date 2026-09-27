@@ -16,18 +16,19 @@ import {
   useParams,
 } from 'react-router'
 import {
+  Activity,
   AlertTriangle,
+  ArrowUpRight,
   BriefcaseBusiness,
   Building2,
   CalendarDays,
   CheckCircle2,
-  ChevronRight,
   ClipboardList,
   EyeOff,
   FileSignature,
   FileText,
   FolderArchive,
-  Hammer,
+  HardHat,
   Home,
   Info,
   LogIn,
@@ -39,7 +40,9 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  TrendingUp,
   Users,
+  WalletCards,
   X,
   type LucideIcon,
 } from 'lucide-react'
@@ -227,19 +230,19 @@ function AppShell() {
   const { role, setRole } = useAppState()
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="app-shell min-h-screen text-slate-900">
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 border-r border-slate-200 bg-white shadow-sm transition-transform lg:translate-x-0 ${
+        className={`app-sidebar fixed inset-y-0 left-0 z-40 w-72 transition-transform lg:translate-x-0 ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-16 items-center gap-3 border-b border-slate-200 px-5">
-          <div className="grid h-10 w-10 place-items-center rounded-md bg-sky-700 text-white">
-            <Hammer size={22} aria-hidden="true" />
+        <div className="sidebar-brand flex h-20 items-center gap-3 px-5">
+          <div className="brand-mark grid h-11 w-11 place-items-center">
+            <HardHat size={23} aria-hidden="true" />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-slate-950">建設業務台帳</p>
-            <p className="text-xs text-slate-500">Phase 1 UI Mock</p>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-white">建設業務台帳</p>
+            <p className="mt-0.5 text-xs text-slate-400">FIELD OPERATIONS</p>
           </div>
           <button
             className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-600 lg:hidden"
@@ -252,17 +255,25 @@ function AppShell() {
           </button>
         </div>
 
-        <nav className="grid gap-1 px-3 py-4">
+        <div className="sidebar-status mx-4 mt-4 flex items-center justify-between px-3 py-2.5">
+          <span className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+            <Activity size={14} aria-hidden="true" />
+            システム稼働中
+          </span>
+          <span className="live-dot" aria-hidden="true" />
+        </div>
+
+        <nav className="sidebar-nav grid gap-1 px-3 py-4">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               onClick={() => setIsMenuOpen(false)}
               className={({ isActive }) =>
-                `flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium transition ${
+                `sidebar-link flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium transition ${
                   isActive
-                    ? 'bg-sky-50 text-sky-800 ring-1 ring-sky-100'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
+                    ? 'sidebar-link-active'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
                 }`
               }
             >
@@ -283,7 +294,7 @@ function AppShell() {
       ) : null}
 
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-20 flex min-h-16 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur md:px-6">
+        <header className="app-topbar sticky top-0 z-20 flex min-h-20 items-center gap-3 px-4 backdrop-blur md:px-8">
           <button
             className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-700 lg:hidden"
             type="button"
@@ -294,8 +305,8 @@ function AppShell() {
             <Menu size={20} aria-hidden="true" />
           </button>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-950">ABC建設株式会社</p>
-            <p className="text-xs text-slate-500">現場中心の受発注・履歴管理モック</p>
+            <p className="truncate text-sm font-bold text-slate-950">ABC建設株式会社</p>
+            <p className="mt-0.5 text-xs text-slate-500">2026年9月27日・全社オペレーション</p>
           </div>
           <label className="ml-auto grid gap-1 text-xs font-medium text-slate-600">
             ロール
@@ -313,7 +324,7 @@ function AppShell() {
           </label>
         </header>
 
-        <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 md:px-6">
+        <main className="app-main mx-auto grid w-full max-w-[1500px] gap-7 px-4 py-6 md:px-8 md:py-8">
           <Outlet />
         </main>
       </div>
@@ -336,13 +347,14 @@ function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-slate-100 p-4 md:grid-cols-[minmax(0,1fr)_440px] md:p-8">
-      <section className="flex min-h-[360px] flex-col justify-between rounded-l-md bg-slate-950 p-8 text-white md:p-10">
+    <main className="login-layout grid min-h-screen p-4 md:grid-cols-[minmax(0,1fr)_440px] md:p-8">
+      <section className="login-intro flex min-h-[360px] flex-col justify-between p-8 text-white md:p-10">
         <div>
-          <div className="mb-8 inline-flex h-12 w-12 items-center justify-center rounded-md bg-sky-600">
-            <Hammer size={26} aria-hidden="true" />
+          <div className="login-mark mb-8 inline-flex h-12 w-12 items-center justify-center">
+            <HardHat size={26} aria-hidden="true" />
           </div>
-          <h1 className="max-w-3xl text-3xl font-semibold leading-tight md:text-5xl">
+          <p className="login-kicker">CONSTRUCTION OPERATIONS SYSTEM</p>
+          <h1 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight md:text-5xl">
             現場を中心に、契約・人員・請求・証憑を一本の履歴にする
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
@@ -356,10 +368,10 @@ function LoginPage() {
         </div>
       </section>
 
-      <section className="rounded-r-md bg-white p-6 shadow-sm md:p-8">
+      <section className="login-form-panel p-6 md:p-8">
         <form className="grid gap-5" onSubmit={login}>
           <div>
-            <p className="text-sm font-semibold text-sky-700">デモログイン</p>
+            <p className="text-sm font-bold text-cyan-700">SECURE DEMO ACCESS</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">建設業務台帳</h2>
           </div>
           <label className="grid gap-2 text-sm font-medium text-slate-700">
@@ -393,7 +405,7 @@ function LoginPage() {
             </select>
           </label>
           <button
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-sky-700 px-4 text-sm font-semibold text-white transition hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+            className="login-button inline-flex h-11 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-cyan-300"
             type="button"
             onClick={completeLogin}
           >
@@ -429,17 +441,72 @@ function DashboardPage() {
   const waitingInvoice = invoices.filter((invoice) => ['未請求', '作成中'].includes(invoice.status))
   const waitingPayment = invoices.filter((invoice) => invoice.status === '入金待ち')
   const payable = transactions.filter((tx) => tx.direction === '発注' && tx.status !== '完了')
+  const totalHeadcount = sites.reduce((sum, site) => sum + site.headcountToday, 0)
+  const activeContractAmount = activeSites.reduce((sum, site) => sum + site.contractAmount, 0)
+  const billedAmount = invoices.reduce((sum, invoice) => sum + invoice.amount, 0)
+  const payableAmount = payable.reduce((sum, transaction) => sum + transaction.amount, 0)
+  const progressedOperations = transactions.filter((tx) => ['契約済', '施工中', '完了', '請求済'].includes(tx.status)).length
+  const operationRate = transactions.length === 0 ? 0 : Math.round((progressedOperations / transactions.length) * 100)
 
   return (
     <>
       <PageHeader
-        label="Dashboard"
+        label="OPERATIONS / DASHBOARD"
         title="会社全体の状況"
         description="現場、契約、請求、支払予定を一画面で確認します。"
         action={<LinkButton to="/transactions" icon={Plus} label="取引登録" />}
       />
 
-      <div className="grid gap-3 md:grid-cols-5">
+      <div className="dashboard-command-grid">
+        <section className="command-panel operations-overview">
+          <div className="panel-kicker">
+            <span className="flex items-center gap-2"><Activity size={15} aria-hidden="true" />LIVE OPERATIONS</span>
+            <span>09.27 CURRENT</span>
+          </div>
+          <div className="operations-content">
+            <div>
+              <p className="command-label">本日の総稼働</p>
+              <p className="command-value">{totalHeadcount}<span>名</span></p>
+              <p className="command-copy">進行中 {activeSites.length}現場 / 管理対象 {sites.length}現場</p>
+            </div>
+            <OperationalGauge value={operationRate} />
+          </div>
+          <div className="site-progress-list">
+            {sites.map((site) => {
+              const progress = siteProgress(site)
+              return (
+                <Link key={site.id} to={`/sites/${site.id}`} className="site-progress-row">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className={`site-state-dot ${site.status === '施工中' ? 'is-active' : ''}`} aria-hidden="true" />
+                    <span className="truncate">{site.name}</span>
+                  </div>
+                  <div className="progress-track" aria-label={`工程進捗 ${progress}%`}>
+                    <span style={{ width: `${progress}%` }} />
+                  </div>
+                  <strong>{progress}%</strong>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+
+        <section className="command-panel cashflow-panel">
+          <div className="panel-heading">
+            <div>
+              <p className="panel-label">CASH FLOW</p>
+              <h2>資金フロー概況</h2>
+            </div>
+            <WalletCards size={22} aria-hidden="true" />
+          </div>
+          <CashFlowBars billed={billedAmount} payable={payableAmount} contract={activeContractAmount} />
+          <div className="cashflow-total">
+            <span>進行中契約総額</span>
+            <strong>{formatCompactCurrency(activeContractAmount)}</strong>
+          </div>
+        </section>
+      </div>
+
+      <div className="kpi-grid grid gap-3 md:grid-cols-5">
         <KpiCard label="進行中現場" value={`${activeSites.length}件`} tone="sky" />
         <KpiCard label="未契約案件" value={`${waitingContract.length}件`} tone="amber" />
         <KpiCard label="未請求" value={`${waitingInvoice.length}件`} tone="rose" />
@@ -447,25 +514,32 @@ function DashboardPage() {
         <KpiCard label="支払予定" value={`${payable.length}件`} tone="slate" />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+      <div className="grid gap-7 xl:grid-cols-[1fr_400px]">
         <Section title="本日の現場">
           <div className="grid gap-3 md:grid-cols-3">
             {sites.map((site) => (
               <Link
                 key={site.id}
                 to={`/sites/${site.id}`}
-                className="group rounded-md border border-slate-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+                className="site-card group p-4 transition"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-slate-950">{site.name}</p>
                     <p className="mt-1 text-sm text-slate-500">{site.address}</p>
                   </div>
-                  <ChevronRight className="mt-1 text-slate-300 group-hover:text-sky-600" size={18} aria-hidden="true" />
+                  <span className="site-card-arrow"><ArrowUpRight size={17} aria-hidden="true" /></span>
                 </div>
-                <div className="mt-4 flex items-center gap-2 text-sm">
+                <div className="mt-5 flex items-center gap-2 text-sm">
                   <StatusBadge label={site.status} />
                   <span className="text-slate-500">{site.headcountToday}人</span>
+                </div>
+                <div className="mt-4">
+                  <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
+                    <span>工程進捗</span>
+                    <strong className="text-slate-800">{siteProgress(site)}%</strong>
+                  </div>
+                  <div className="site-card-progress"><span style={{ width: `${siteProgress(site)}%` }} /></div>
                 </div>
               </Link>
             ))}
@@ -485,6 +559,49 @@ function DashboardPage() {
         <AuditLogList limit={5} />
       </Section>
     </>
+  )
+}
+
+function OperationalGauge({ value }: { value: number }) {
+  const circumference = 2 * Math.PI * 44
+  const offset = circumference - (value / 100) * circumference
+
+  return (
+    <div className="operations-gauge" aria-label={`取引進行率 ${value}%`}>
+      <svg viewBox="0 0 108 108" role="img" aria-hidden="true">
+        <circle className="gauge-base" cx="54" cy="54" r="44" />
+        <circle className="gauge-value" cx="54" cy="54" r="44" strokeDasharray={circumference} strokeDashoffset={offset} />
+      </svg>
+      <div>
+        <strong>{value}%</strong>
+        <span>取引進行率</span>
+      </div>
+    </div>
+  )
+}
+
+function CashFlowBars({ billed, payable, contract }: { billed: number; payable: number; contract: number }) {
+  const metrics = [
+    { label: '請求計上', value: billed, tone: 'cyan' },
+    { label: '支払予定', value: payable, tone: 'yellow' },
+    { label: '契約残高', value: Math.max(contract - billed, 0), tone: 'coral' },
+  ]
+  const maxValue = Math.max(...metrics.map((metric) => metric.value), 1)
+
+  return (
+    <div className="cashflow-bars">
+      {metrics.map((metric) => (
+        <div key={metric.label} className="cashflow-row">
+          <div className="flex items-center justify-between gap-3">
+            <span>{metric.label}</span>
+            <strong>{formatCompactCurrency(metric.value)}</strong>
+          </div>
+          <div className="cashflow-track">
+            <span className={`cashflow-fill ${metric.tone}`} style={{ width: `${Math.max((metric.value / maxValue) * 100, 3)}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -1334,10 +1451,10 @@ function PageHeader({
   action?: ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="page-header flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">{label}</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-normal text-slate-950 md:text-3xl">{title}</h1>
+        <p className="page-eyebrow text-xs font-bold uppercase text-cyan-700">{label}</p>
+        <h1 className="mt-1 text-2xl font-bold text-slate-950 md:text-3xl">{title}</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{description}</p>
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
@@ -1347,8 +1464,8 @@ function PageHeader({
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="grid gap-4">
-      <h2 className="text-lg font-semibold tracking-normal text-slate-950">{title}</h2>
+    <section className="surface-section grid gap-4">
+      <h2 className="section-title text-lg font-bold text-slate-950">{title}</h2>
       {children}
     </section>
   )
@@ -1356,17 +1473,29 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function KpiCard({ label, value, tone }: { label: string; value: string; tone: 'sky' | 'amber' | 'rose' | 'emerald' | 'slate' }) {
   const classes = {
-    sky: 'border-sky-200 bg-sky-50 text-sky-800',
-    amber: 'border-amber-200 bg-amber-50 text-amber-800',
-    rose: 'border-rose-200 bg-rose-50 text-rose-800',
-    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    slate: 'border-slate-200 bg-white text-slate-800',
+    sky: 'kpi-sky',
+    amber: 'kpi-amber',
+    rose: 'kpi-rose',
+    emerald: 'kpi-emerald',
+    slate: 'kpi-slate',
   }
 
+  const detail = {
+    sky: '稼働状況',
+    amber: '要確認',
+    rose: '請求処理',
+    emerald: '回収予定',
+    slate: '支払管理',
+  }[tone]
+
   return (
-    <div className={`rounded-md border p-4 ${classes[tone]}`}>
-      <p className="text-sm font-medium">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-normal">{value}</p>
+    <div className={`kpi-card ${classes[tone]}`}>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm font-semibold">{label}</p>
+        <TrendingUp size={16} aria-hidden="true" />
+      </div>
+      <p className="kpi-value">{value}</p>
+      <p className="kpi-detail">{detail}</p>
     </div>
   )
 }
@@ -1385,13 +1514,13 @@ function NoticeCard({ level, title, body, action }: { level: NoticeLevel; title:
   }
   const Icon = iconMap[level]
   const tone = {
-    INFO: 'border-sky-200 bg-sky-50 text-sky-950',
-    WARNING: 'border-amber-200 bg-amber-50 text-amber-950',
-    CONFIRM: 'border-rose-200 bg-rose-50 text-rose-950',
+    INFO: 'notice-info',
+    WARNING: 'notice-warning',
+    CONFIRM: 'notice-confirm',
   }[level]
 
   return (
-    <div className={`rounded-md border p-4 ${tone}`}>
+    <div className={`notice-card p-4 ${tone}`}>
       <div className="flex gap-3">
         <Icon className="mt-0.5 shrink-0" size={18} aria-hidden="true" />
         <div>
@@ -1406,7 +1535,7 @@ function NoticeCard({ level, title, body, action }: { level: NoticeLevel; title:
 
 function RecordCard({ title, meta, children }: { title: string; meta: string; children: ReactNode }) {
   return (
-    <article className="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+    <article className="record-card p-4">
       <p className="text-sm font-medium text-slate-500">{meta}</p>
       <h3 className="mt-1 text-base font-semibold tracking-normal text-slate-950">{title}</h3>
       <div className="mt-4 grid gap-2 text-sm">{children}</div>
@@ -1427,11 +1556,11 @@ function LinkButton({
 }) {
   const classes =
     variant === 'primary'
-      ? 'bg-sky-700 text-white hover:bg-sky-800'
-      : 'border border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50'
+      ? 'action-link-primary'
+      : 'action-link-secondary'
 
   return (
-    <Link className={`inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition ${classes}`} to={to}>
+    <Link className={`action-link inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold transition ${classes}`} to={to}>
       <Icon size={18} aria-hidden="true" />
       {label}
     </Link>
@@ -1443,7 +1572,7 @@ function SearchBox({ value, onChange, placeholder }: { value: string; onChange: 
     <label className="relative block">
       <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} aria-hidden="true" />
       <input
-        className="h-10 w-full min-w-64 rounded-md border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+        className="search-field h-10 w-full min-w-64 rounded-md border bg-white pl-10 pr-3 text-sm text-slate-900 outline-none"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
@@ -1496,8 +1625,8 @@ function ConfirmModal({
   isConfirmDisabled: boolean
 }) {
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4">
-      <div className="w-full max-w-lg rounded-md bg-white p-5 shadow-xl">
+    <div className="modal-backdrop fixed inset-0 z-50 grid place-items-center p-4">
+      <div className="modal-panel w-full max-w-lg p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">CONFIRM</p>
@@ -1677,9 +1806,9 @@ function AuditLogList({ limit }: { limit?: number }) {
 
 function AuditLogRows({ logs }: { logs: AuditLog[] }) {
   return (
-    <div className="grid gap-2">
+    <div className="audit-log-list grid gap-2">
       {logs.map((log) => (
-        <div key={log.id} className="grid gap-2 rounded-md border border-slate-200 bg-white p-3 text-sm md:grid-cols-[160px_140px_1fr_180px]">
+        <div key={log.id} className="audit-log-row grid gap-2 p-3 text-sm md:grid-cols-[160px_140px_1fr_180px]">
           <span className="text-slate-500">{log.at}</span>
           <span className="font-semibold text-slate-950">{log.actor}</span>
           <span className="text-slate-700">{log.action}</span>
@@ -1692,7 +1821,7 @@ function AuditLogRows({ logs }: { logs: AuditLog[] }) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-md border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+    <div className="empty-state p-6 text-center text-sm text-slate-500">
       {message}
     </div>
   )
@@ -1700,7 +1829,7 @@ function EmptyState({ message }: { message: string }) {
 
 function SummaryPill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-white/15 bg-white/5 px-4 py-3">
+    <div className="summary-pill px-4 py-3">
       <p className="text-xs text-slate-400">{label}</p>
       <p className="mt-1 font-semibold text-white">{value}</p>
     </div>
@@ -1761,6 +1890,34 @@ function formatCurrency(value: number) {
     currency: 'JPY',
     maximumFractionDigits: 0,
   }).format(value)
+}
+
+function formatCompactCurrency(value: number) {
+  if (value >= 100_000_000) {
+    return `${(value / 100_000_000).toFixed(1)}億円`
+  }
+
+  if (value >= 10_000) {
+    return `${Math.round(value / 10_000).toLocaleString('ja-JP')}万円`
+  }
+
+  return formatCurrency(value)
+}
+
+function siteProgress(site: Site) {
+  if (site.status === '完了') {
+    return 100
+  }
+
+  const start = Date.parse(site.startDate)
+  const end = Date.parse(site.endDate)
+  const current = Date.parse(mockToday)
+
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    return 0
+  }
+
+  return Math.max(0, Math.min(100, Math.round(((current - start) / (end - start)) * 100)))
 }
 
 function statusTone(label: string) {

@@ -1,0 +1,51 @@
+.product-app .w-workflow { min-width: 0; }
+.product-app .w-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.product-app .w-heading h2 { font-size: 21px; }
+.product-app .w-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-block: 1px solid var(--p-line); margin: 24px 0; }
+.product-app .w-steps button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 60px; padding: 10px 5px; border: 0; border-bottom: 2px solid transparent; background: transparent; font: inherit; font-size: 13px; color: var(--p-muted); }
+.product-app .w-steps button span { display: grid; place-items: center; flex-shrink: 0; width: 23px; height: 23px; border: 1px solid var(--p-line); border-radius: 50%; font-size: 12px; }
+.product-app .w-steps [aria-current] { color: var(--p-green); border-bottom-color: var(--p-green); font-weight: 700; }
+.product-app .w-steps [aria-current] span { color: #fff; background: var(--p-green); }
+.product-app .w-workflow h3 { font-size: 18px; margin: 18px 0; }
+.product-app .w-workflow h4 { font-size: 14px; margin: 16px 0; }
+.product-app .w-alert { display: flex; align-items: flex-start; gap: 9px; padding: 13px 0; color: #8a302b; overflow-wrap: anywhere; }
+.product-app .w-alert svg { flex-shrink: 0; margin-top: 2px; }
+.product-app .w-actions, .product-app .w-file-links { display: flex; flex-wrap: wrap; gap: 10px 18px; margin: 16px 0; }
+.product-app .w-conflict { padding: 16px; background: #fff9e9; border-block: 1px solid #ddc287; }
+.product-app .w-conflict > p { margin: 12px 0; }
+.product-app .w-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.product-app .w-snapshot { min-width: 0; font-size: 12px; }
+.product-app .w-snapshot summary { cursor: pointer; padding-block: 10px; overflow-wrap: anywhere; }
+.product-app .w-snapshot dl { margin-block: 8px; }
+.product-app .w-snapshot dl > div { display: grid; grid-template-columns: minmax(0, .5fr) minmax(0, 1fr); gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--p-line); }
+.product-app .w-snapshot dd { white-space: pre-wrap; overflow-wrap: anywhere; }
+.product-app .w-snapshot ol { padding-left: 20px; }
+.product-app .w-snapshot li { padding-block: 8px; }
+.product-app .w-save-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 22px 0; margin: 26px 0 8px; border-top: 1px solid var(--p-line); }
+.product-app .w-files, .product-app .w-history { padding: 18px 0; border-top: 1px solid var(--p-line); }
+.product-app .w-files summary, .product-app .w-reviews summary { cursor: pointer; min-height: 44px; padding-block: 10px; font-size: 14px; }
+.product-app .w-files ul, .product-app .w-issue-list, .product-app .w-audit-list { list-style: none; padding: 0; }
+.product-app .w-files li { display: flex; justify-content: space-between; gap: 15px; padding: 12px 0; font-size: 13px; border-bottom: 1px solid var(--p-line); }
+.product-app .w-files a { display: inline-flex; align-items: center; gap: 7px; overflow-wrap: anywhere; }
+.product-app .w-upload { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0; font-size: 13px; }
+.product-app .w-upload input { width: 100%; max-width: 100%; }
+.product-app .w-issue-list > li { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 17px 0; border-bottom: 1px solid var(--p-line); }
+.product-app .w-issue-list strong { font-size: 14px; }
+.product-app .w-issue-list span, .product-app .w-issue-list p { display: block; font-size: 12px; margin-top: 7px; overflow-wrap: anywhere; }
+.product-app .w-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding: 20px 0; }
+.product-app .w-form-grid > label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.product-app .w-wide { grid-column: 1 / -1; }
+.product-app .w-evidence-list { display: grid; gap: 10px; margin-bottom: 20px; }
+.product-app .w-evidence-list label { display: flex; align-items: center; gap: 10px; font-size: 13px; overflow-wrap: anywhere; }
+.product-app .w-evidence-list input { width: 17px; height: 17px; }
+.product-app .w-file-links a { font-size: 12px; overflow-wrap: anywhere; }
+.product-app .w-audit-list > li { border-bottom: 1px solid var(--p-line); padding: 15px 0; }
+.product-app .w-audit-list summary { cursor: pointer; overflow-wrap: anywhere; font-size: 13px; }
+@media (max-width: 680px) {
+  .product-app .w-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .product-app .w-steps button { justify-content: flex-start; min-height: 48px; }
+  .product-app .w-compare, .product-app .w-form-grid { grid-template-columns: minmax(0, 1fr); }
+  .product-app .w-save-bar > .p-button { width: 100%; justify-content: center; }
+  .product-app .w-issue-list > li { flex-wrap: wrap; }
+  .product-app .w-heading { align-items: flex-start; flex-wrap: wrap; }
+}

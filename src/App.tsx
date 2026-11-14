@@ -10,6 +10,7 @@ import {
   createHashRouter,
   Link,
   NavLink,
+  Navigate,
   Outlet,
   RouterProvider,
   useNavigate,
@@ -20,31 +21,19 @@ import {
   Activity,
   AlertTriangle,
   ArrowUpRight,
-  BriefcaseBusiness,
   Building2,
-  CalendarDays,
   CheckCircle2,
-  ClipboardList,
   EyeOff,
-  FileSignature,
-  FileText,
   FolderArchive,
   HardHat,
   Home,
   Info,
   LogIn,
-  Menu,
-  NotebookText,
-  Package,
   Plus,
-  ReceiptText,
   Search,
   Settings,
-  ShieldCheck,
   TrendingUp,
-  Users,
   WalletCards,
-  X,
   type LucideIcon,
 } from 'lucide-react'
 import {
@@ -69,6 +58,10 @@ import {
   workSchedules,
 } from './data/mock/domain'
 import { laborInsuranceRecords } from './data/mock/laborInsurance'
+import { FieldProvider } from './field/FieldProvider'
+import { FieldHomePage, FieldJobsPage, FieldJobPage, FieldPhotosPage, FieldTimelinePage, FieldNoticePage, FieldPaperPage, FieldDocumentsPage } from './field/Workspace'
+import { FieldCompliancePage } from './field/CompliancePage'
+import { FieldPaymentPage } from './field/PaymentPage'
 import type {
   AuditLog,
   Contract,
@@ -106,21 +99,9 @@ const storageKey = 'construction-platform-mock-role'
 const mockToday = '2026-09-27'
 
 const navItems: NavItem[] = [
-  { to: '/dashboard', label: 'ダッシュボード', icon: Home },
-  { to: '/sites', label: '現場', icon: Building2 },
-  { to: '/transactions', label: '受発注', icon: ClipboardList },
-  { to: '/estimates', label: '見積', icon: FileText },
-  { to: '/contracts', label: '契約', icon: FileSignature },
-  { to: '/materials', label: '資材', icon: Package },
-  { to: '/employees', label: '人員', icon: Users },
-  { to: '/schedule', label: '配置', icon: CalendarDays },
-  { to: '/daily-reports', label: '日報', icon: NotebookText },
-  { to: '/invoices', label: '請求', icon: ReceiptText },
+  { to: '/dashboard', label: 'ホーム', icon: Home },
+  { to: '/sites', label: '工事', icon: Building2 },
   { to: '/documents', label: '書類', icon: FolderArchive },
-  { to: '/labor-insurance', label: '労働保険', icon: ShieldCheck },
-  { to: '/licenses', label: '建設業許可', icon: ShieldCheck },
-  { to: '/company', label: '会社情報', icon: BriefcaseBusiness },
-  { to: '/settings', label: '設定', icon: Settings },
 ]
 
 const router = createHashRouter([
@@ -128,13 +109,23 @@ const router = createHashRouter([
     path: '/',
     element: <Outlet />,
     children: [
-      { index: true, element: <LoginPage /> },
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { path: 'login', element: <LoginPage /> },
       {
         element: <AppShell />,
         children: [
-          { path: 'dashboard', element: <DashboardPage /> },
-          { path: 'sites', element: <SitesPage /> },
-          { path: 'sites/:siteId', element: <SiteDetailPage /> },
+          { path: 'dashboard', element: <FieldHomePage /> },
+          { path: 'legacy-dashboard', element: <DashboardPage /> },
+          { path: 'legacy-sites', element: <SitesPage /> },
+          { path: 'sites', element: <FieldJobsPage /> },
+          { path: 'sites/:siteId', element: <FieldJobPage /> },
+          { path: 'sites/:siteId/checks', element: <FieldCompliancePage /> },
+          { path: 'sites/:siteId/payments', element: <FieldPaymentPage /> },
+          { path: 'sites/:siteId/legacy', element: <SiteDetailPage /> },
+          { path: 'sites/:siteId/photos', element: <FieldPhotosPage /> },
+          { path: 'sites/:siteId/timeline', element: <FieldTimelinePage /> },
+          { path: 'sites/:siteId/notice', element: <FieldNoticePage /> },
+          { path: 'sites/:siteId/paperwork', element: <FieldPaperPage /> },
           { path: 'transactions', element: <TransactionsPage /> },
           { path: 'estimates', element: <EstimatesPage /> },
           { path: 'contracts', element: <ContractsPage /> },
@@ -143,7 +134,8 @@ const router = createHashRouter([
           { path: 'schedule', element: <SchedulePage /> },
           { path: 'daily-reports', element: <DailyReportsPage /> },
           { path: 'invoices', element: <InvoicesPage /> },
-          { path: 'documents', element: <DocumentsPage /> },
+          { path: 'documents', element: <FieldDocumentsPage /> },
+          { path: 'legacy-documents', element: <DocumentsPage /> },
           { path: 'labor-insurance', element: <LaborInsurancePage /> },
           { path: 'licenses', element: <LicensesPage /> },
           { path: 'company', element: <CompanyPage /> },
@@ -160,7 +152,9 @@ const AppStateContext = createContext<AppState | null>(null)
 function App() {
   return (
     <AppStateProvider>
+      <FieldProvider>
       <RouterProvider router={router} />
+      </FieldProvider>
     </AppStateProvider>
   )
 }
@@ -233,16 +227,9 @@ function readStoredRole(): Role {
 }
 
 function AppShell() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { role, setRole } = useAppState()
-
   return (
-    <div className="app-shell min-h-screen text-slate-900">
-      <aside
-        className={`app-sidebar fixed inset-y-0 left-0 z-40 w-72 transition-transform lg:translate-x-0 ${
-          isMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
+    <div className="app-shell field-shell min-h-screen text-slate-900">
+      <aside className="app-sidebar field-sidebar fixed inset-y-0 left-0 z-40 hidden w-56 lg:block">
         <div className="sidebar-brand flex h-20 items-center gap-3 px-5">
           <div className="brand-mark grid h-11 w-11 place-items-center">
             <HardHat size={23} aria-hidden="true" />
@@ -251,23 +238,6 @@ function AppShell() {
             <p className="truncate text-sm font-bold text-white">建設業務台帳</p>
             <p className="mt-0.5 text-xs text-slate-400">FIELD OPERATIONS</p>
           </div>
-          <button
-            className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-600 lg:hidden"
-            type="button"
-            onClick={() => setIsMenuOpen(false)}
-            aria-label="メニューを閉じる"
-            title="メニューを閉じる"
-          >
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-
-        <div className="sidebar-status mx-4 mt-4 flex items-center justify-between px-3 py-2.5">
-          <span className="flex items-center gap-2 text-xs font-semibold text-slate-300">
-            <Activity size={14} aria-hidden="true" />
-            システム稼働中
-          </span>
-          <span className="live-dot" aria-hidden="true" />
         </div>
 
         <nav className="sidebar-nav grid gap-1 px-3 py-4">
@@ -275,7 +245,6 @@ function AppShell() {
             <NavLink
               key={item.to}
               to={item.to}
-              onClick={() => setIsMenuOpen(false)}
               className={({ isActive }) =>
                 `sidebar-link flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium transition ${
                   isActive
@@ -289,52 +258,23 @@ function AppShell() {
             </NavLink>
           ))}
         </nav>
+        <div className="field-sidebar-footer"><span>端末保存版</span><Link to="/settings"><Settings size={17} />設定・管理</Link></div>
       </aside>
-
-      {isMenuOpen ? (
-        <button
-          type="button"
-          className="fixed inset-0 z-30 bg-slate-950/30 lg:hidden"
-          onClick={() => setIsMenuOpen(false)}
-          aria-label="メニュー背景を閉じる"
-        />
-      ) : null}
-
-      <div className="lg:pl-72">
+      <div className="lg:pl-56">
         <header className="app-topbar sticky top-0 z-20 flex min-h-20 items-center gap-3 px-4 backdrop-blur md:px-8">
-          <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 text-slate-700 lg:hidden"
-            type="button"
-            onClick={() => setIsMenuOpen(true)}
-            aria-label="メニューを開く"
-            title="メニューを開く"
-          >
-            <Menu size={20} aria-hidden="true" />
-          </button>
+          <HardHat className="lg:hidden" size={23} aria-hidden="true" />
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-slate-950">ABC建設株式会社</p>
-            <p className="mt-0.5 text-xs text-slate-500">2026年9月27日・全社オペレーション</p>
+            <p className="mt-0.5 text-xs text-slate-500">建設業務台帳 / 端末保存版</p>
           </div>
-          <label className="ml-auto grid gap-1 text-xs font-medium text-slate-600">
-            ロール
-            <select
-              className="h-10 min-w-40 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-              value={role}
-              onChange={(event) => setRole(event.target.value as Role)}
-            >
-              {roles.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Link className="field-icon-button ml-auto" to="/settings" aria-label="設定・管理" title="設定・管理"><Settings size={21} /></Link>
         </header>
 
         <main className="app-main mx-auto grid w-full max-w-[1500px] gap-7 px-4 py-6 md:px-8 md:py-8">
           <AnimatedOutlet />
         </main>
       </div>
+      <nav className="field-mobile-nav lg:hidden" aria-label="メインメニュー">{navItems.map((item) => <NavLink key={item.to} to={item.to} className={({ isActive }) => isActive ? 'active' : ''}><item.icon size={22} /><span>{item.label}</span></NavLink>)}</nav>
     </div>
   )
 }
@@ -740,9 +680,6 @@ function TransactionsPage() {
   const [kind, setKind] = useState<TransactionKind>('人工・応援')
   const [direction, setDirection] = useState<'受注' | '発注'>('発注')
   const [amount, setAmount] = useState('480000')
-  const [asConstruction, setAsConstruction] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [confirmed, setConfirmed] = useState(false)
   const [error, setError] = useState('')
 
   const registerTransaction = (confirmedException: boolean) => {
@@ -772,9 +709,6 @@ function TransactionsPage() {
       action: transaction.confirmedException ? '注意事項を確認して取引を登録' : '取引を登録',
       target: transaction.number,
     })
-    setConfirmed(false)
-    setAsConstruction(false)
-    setIsModalOpen(false)
   }
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -787,8 +721,8 @@ function TransactionsPage() {
       return
     }
 
-    if (kind === '人工・応援' && asConstruction) {
-      setIsModalOpen(true)
+    if (kind === '人工・応援') {
+      setError('人工・応援は取引実態の審査が必要です。この試作版では登録を保留します。工事の確認に施工分担・指揮命令等の資料を残してください。')
       return
     }
 
@@ -902,15 +836,7 @@ function TransactionsPage() {
                     </p>
                   </div>
                 </div>
-                <label className="mt-3 flex items-start gap-2 text-sm font-medium">
-                  <input
-                    className="mt-1"
-                    type="checkbox"
-                    checked={asConstruction}
-                    onChange={(event) => setAsConstruction(event.target.checked)}
-                  />
-                  建設工事として登録する
-                </label>
+                <Link className="mt-3 inline-block underline" to={`/sites/${siteId}/checks`}>工事の確認を開く</Link>
               </div>
             ) : null}
 
@@ -922,26 +848,6 @@ function TransactionsPage() {
         </Section>
       </div>
 
-      {isModalOpen ? (
-        <ConfirmModal
-          title="標準ルートと異なる登録"
-          onClose={() => setIsModalOpen(false)}
-          onConfirm={() => registerTransaction(true)}
-          isConfirmDisabled={!confirmed}
-        >
-          <p>通常、本システムでは人工・応援取引を請負工事として扱いません。</p>
-          <p className="mt-2">取引実態をご確認の上、必要に応じて専門家等へご確認ください。</p>
-          <label className="mt-4 flex items-start gap-2 text-sm font-medium text-slate-800">
-            <input
-              className="mt-1"
-              type="checkbox"
-              checked={confirmed}
-              onChange={(event) => setConfirmed(event.target.checked)}
-            />
-            内容を確認しました
-          </label>
-        </ConfirmModal>
-      ) : null}
     </>
   )
 }
@@ -1577,7 +1483,7 @@ function CompanyPage() {
 }
 
 function SettingsPage() {
-  const { role, auditLogs } = useAppState()
+  const { role, setRole, auditLogs } = useAppState()
   const permissions = rolePermissions[role]
 
   return (
@@ -1585,6 +1491,7 @@ function SettingsPage() {
       <PageHeader label="Settings" title="ユーザー管理・設定" description="Phase 1ではロール切替による見え方の差を確認します。" />
       <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
         <Section title="現在の権限">
+          <label className="grid gap-2 mb-4 text-sm">デモのロール<select className="field" value={role} onChange={(event) => setRole(event.target.value as Role)}>{roles.map((item) => <option key={item}>{item}</option>)}</select></label>
           <div className="grid gap-2">
             {(['amounts', 'contracts', 'costs', 'invoices', 'employees', 'sites', 'licenses'] as PermissionKey[]).map((key) => (
               <div key={key} className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm">
@@ -1896,51 +1803,6 @@ function FormAlert({ tone, message }: { tone: 'info' | 'warning' | 'error'; mess
   }[tone]
 
   return <p className={`rounded-md border px-3 py-2 text-sm leading-6 ${toneClass}`}>{message}</p>
-}
-
-function ConfirmModal({
-  title,
-  children,
-  onClose,
-  onConfirm,
-  isConfirmDisabled,
-}: {
-  title: string
-  children: ReactNode
-  onClose: () => void
-  onConfirm: () => void
-  isConfirmDisabled: boolean
-}) {
-  return (
-    <div className="modal-backdrop fixed inset-0 z-50 grid place-items-center p-4">
-      <div className="modal-panel w-full max-w-lg p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">CONFIRM</p>
-            <h2 className="mt-1 text-xl font-semibold text-slate-950">{title}</h2>
-          </div>
-          <button
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-600"
-            type="button"
-            onClick={onClose}
-            aria-label="閉じる"
-            title="閉じる"
-          >
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-        <div className="mt-4 text-sm leading-6 text-slate-700">{children}</div>
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <button className="secondary-button" type="button" onClick={onClose}>
-            戻る
-          </button>
-          <button className="primary-button sm:w-auto" type="button" disabled={isConfirmDisabled} onClick={onConfirm}>
-            このまま登録する
-          </button>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 function EstimateList({ data }: { data: Estimate[] }) {
